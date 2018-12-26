@@ -59,7 +59,7 @@ def create_app(test_config=None):
         return "success"
 
     @app.route('/test_connect')
-    def put_history():
+    def test_connect():
         return "success"
 
     return app
