@@ -58,6 +58,10 @@ def create_app(test_config=None):
         fh.put_chat_history(text)
         return "success"
 
+    @app.route('/test_connect')
+    def put_history():
+        return "success"
+
     return app
 
 
