@@ -1,5 +1,2 @@
-,Unnamed: 0,ID,TIMESTAMP,TEXT
-0,0.0,channing,1234567890123,hello
-1,1.0,lorna,1234567890167,hi
-2,2.0,xiaoming,123,i am 小明
-3,,xiaoming,123,"i am ,小明"
+ID,TIMESTAMP,TEXT
+test_user,1546858241.5848665,This is very beginning of this chat room.
