@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 from flask import Flask, json, request
 
@@ -46,13 +47,20 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/get_history')
     def get_history():
-        fh = FileHandler()
-        return fh.get_chat_history()
+        df = pd.read_csv('./resource/history.csv')
+        messages = []
+        for index, row in df.iterrows():
+            message = {'ID': row['ID'], 'TIMESTAMP': row['TIMESTAMP'], 'TEXT': row['TEXT']}
+            messages.append(message)
+        return str(messages)
 
     @app.route('/put_history', methods=['GET', 'POST'])
     def put_history():
         data = request.get_data()
         j_data = json.loads(data)
+        df = pd.read_csv('./resource/history.csv')
+        append_series = pd.Series({'ID': j_data['ID'], 'TIMESTAMP': j_data['TIMESTAMP'], 'TEXT': j_data['TEXT']})
+        df.append(append_series)
         text = j_data['0']
         fh = FileHandler()
         fh.put_chat_history(text)
