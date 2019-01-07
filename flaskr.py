@@ -1,26 +1,9 @@
 import os
 import pandas as pd
+import time
 
 from flask import Flask, json, request
-
-
-class FileHandler:
-
-    def __init__(self):
-        self.path = "./resource/history.txt"
-
-    def get_chat_history(self):
-        with open(self.path, "r", encoding="utf-8") as f:
-            history_dictionary = {}
-            for index, line in enumerate(f.readlines()):
-                line.rstrip("\n")
-                history_dictionary.__setitem__(str(index), str(line))
-
-            return json.jsonify(history_dictionary)
-
-    def put_chat_history(self, text):
-        with open(self.path, "a", encoding="utf-8") as f:
-            f.write(text+"\n")
+from flask.json import jsonify
 
 
 def create_app(test_config=None):
@@ -50,20 +33,22 @@ def create_app(test_config=None):
         df = pd.read_csv('./resource/history.csv')
         messages = []
         for index, row in df.iterrows():
-            message = {'ID': row['ID'], 'TIMESTAMP': row['TIMESTAMP'], 'TEXT': row['TEXT']}
+            ts = int(row['TIMESTAMP'])
+            tl = time.localtime(ts)
+            # 格式化时间
+            format_time = time.strftime("%Y-%m-%d %H:%M:%S", tl)
+            message = {"ID": str(row['ID']), "TIMESTAMP": str(format_time), "TEXT": str(row['TEXT'])}
             messages.append(message)
-        return str(messages)
+        return jsonify(messages)
 
     @app.route('/put_history', methods=['GET', 'POST'])
     def put_history():
         data = request.get_data()
-        j_data = json.loads(data)
+        j_data = eval(json.loads(data))
         df = pd.read_csv('./resource/history.csv')
         append_series = pd.Series({'ID': j_data['ID'], 'TIMESTAMP': j_data['TIMESTAMP'], 'TEXT': j_data['TEXT']})
-        df.append(append_series)
-        text = j_data['0']
-        fh = FileHandler()
-        fh.put_chat_history(text)
+        df = df.append(append_series, ignore_index=True)
+        df.to_csv('./resource/history.csv')
         return "success"
 
     @app.route('/test_connect')
