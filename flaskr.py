@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 from redis import Redis
 from flask import Response
@@ -22,14 +23,15 @@ class FileHandler:
 
     def put_chat_history(self, text):
         with open(self.path, "a", encoding="utf-8") as f:
-            f.write(text+"\n")
+            f.write(text + "\n")
 
 
 import time
 from datetime import datetime
 
-redis = Redis(host="localhost",port=6379,decode_responses=True)
+redis = Redis(host="localhost", port=6379, decode_responses=True)
 ONLINE_LAST_MINUTES = 5
+
 
 def mark_online(user_id):
     now = int(time.time())
@@ -91,16 +93,21 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/get_history')
     def get_history():
-        fh = FileHandler()
-        return fh.get_chat_history()
+        df = pd.read_csv('./resource/history.csv')
+        messages = []
+        for index, row in df.iterrows():
+            message = {'ID': row['ID'], 'TIMESTAMP': row['TIMESTAMP'], 'TEXT': row['TEXT']}
+            messages.append(message)
+        return str(messages)
 
     @app.route('/put_history', methods=['GET', 'POST'])
     def put_history():
         data = request.get_data()
         j_data = json.loads(data)
-        text = j_data['0']
-        fh = FileHandler()
-        fh.put_chat_history(text)
+        df = pd.read_csv('./resource/history.csv')
+        append_series = pd.Series({'ID': j_data['ID'], 'TIMESTAMP': j_data['TIMESTAMP'], 'TEXT': j_data['TEXT']})
+        df = df.append(append_series, ignore_index=True)
+        df.to_csv('./resource/history.csv')
         return "success"
 
     @app.route('/test_connect')
