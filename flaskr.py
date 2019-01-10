@@ -95,7 +95,7 @@ def create_app(test_config=None):
         df = pd.read_csv('./resource/history.csv')
         append_series = pd.Series({'ID': j_data['ID'], 'TIMESTAMP': j_data['TIMESTAMP'], 'TEXT': j_data['TEXT']})
         df = df.append(append_series, ignore_index=True)
-        df.to_csv('./resource/history.csv')
+        df.to_csv('./resource/history.csv', index=0)
         return "success"
 
     @app.route('/test_connect')
