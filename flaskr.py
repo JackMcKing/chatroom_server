@@ -102,6 +102,33 @@ def create_app(test_config=None):
     def test_connect():
         return "success"
 
+    @app.route('/add_channel/<add_channel_name>', methods=['GET'])
+    def add_channel(add_channel_name):
+        df = pd.read_csv('./resource/channel_list.csv')
+        channel_names = df['CHANNEL_NAME']
+        for channel_name in channel_names:
+            if channel_name == add_channel_name:
+                return "exist"
+            else:
+                new_series = pd.Series({'CHANNEL_NAME': add_channel_name, 'USER': 'flint_bot'})
+        df = df.append(new_series, ignore_index=True)
+        df.to_csv('./resource/channel_list.csv', index=0)
+        return "success"
+
+    @app.route('/switch_channel')
+    def switch_channel():
+        # data_template = '{"who":"", "from_channel":"", "to_channel":""}'
+        data = request.get_data()
+        j_data = eval(json.loads(data))
+        df = pd.read_csv('./resource/channel_list.csv')
+        channel_names = df['CHANNEL_NAME']
+        for channel_name in channel_names:
+            if channel_name == j_data['to_channel']:
+                return "exist"
+            else:
+                new_series = pd.Series({'CHANNEL_NAME': add_channel_name, 'USER': 'flint_bot'})
+        return "success"
+
     return app
 
 
